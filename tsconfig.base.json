@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    "paths": {
+      "@esg/shared-kernel": ["./packages/shared-kernel/src"],
+      "@esg/shared-kernel/*": ["./packages/shared-kernel/src/*"],
+      "@esg/esrs-taxonomy": ["./packages/esrs-taxonomy/src"],
+      "@esg/esrs-taxonomy/*": ["./packages/esrs-taxonomy/src/*"],
+      "@esg/shared-ui": ["./packages/shared-ui/src"],
+      "@esg/shared-ui/*": ["./packages/shared-ui/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}

@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+  - apps/*
+  - modules/*
+  - tools/*
+  - infrastructure/mocks/*
+
+onlyBuiltDependencies:
+  - esbuild

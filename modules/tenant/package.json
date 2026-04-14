@@ -1,0 +1,21 @@
+{
+  "name": "@esg/mod-tenant",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.ts"
+  },
+  "dependencies": {
+    "@esg/shared-kernel": "workspace:*",
+    "@esg/esrs-taxonomy": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
