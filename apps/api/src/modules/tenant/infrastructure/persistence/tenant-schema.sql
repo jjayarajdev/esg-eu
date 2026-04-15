@@ -235,6 +235,20 @@ CREATE TABLE IF NOT EXISTS evidence_documents (
 
 CREATE INDEX IF NOT EXISTS idx_evidence_entity ON evidence_documents(entity_type, entity_id);
 
+-- AI REQUESTS (token tracking)
+CREATE TABLE IF NOT EXISTS ai_requests (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    request_type        VARCHAR(50) NOT NULL,
+    model               VARCHAR(50),
+    prompt_tokens       INTEGER,
+    completion_tokens   INTEGER,
+    total_tokens        INTEGER,
+    input_context       JSONB,
+    output_text         TEXT,
+    duration_ms         INTEGER,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- AUDIT LOG (append-only)
 CREATE TABLE IF NOT EXISTS audit_log (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),

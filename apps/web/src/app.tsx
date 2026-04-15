@@ -8,6 +8,8 @@ import { DataEntryPage } from './features/data-collection/pages/DataEntryPage';
 import { DmaListPage } from './features/dma/pages/DmaListPage';
 import { DmaWizardPage } from './features/dma/pages/DmaWizardPage';
 import { MaterialityMatrixPage } from './features/dma/pages/MaterialityMatrixPage';
+import { ReportListPage } from './features/reporting/pages/ReportListPage';
+import { ReportEditorPage } from './features/reporting/pages/ReportEditorPage';
 
 export function App() {
   return (
@@ -98,7 +100,8 @@ function AppShell() {
             <Route path="/dma" element={<DmaListPage />} />
           <Route path="/dma/:id" element={<DmaWizardPage />} />
           <Route path="/dma/:id/matrix" element={<MaterialityMatrixPage />} />
-            <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
+            <Route path="/reports" element={<ReportListPage />} />
+          <Route path="/reports/:id" element={<ReportEditorPage />} />
           </Routes>
         )}
       </main>

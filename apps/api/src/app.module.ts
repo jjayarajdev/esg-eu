@@ -11,6 +11,9 @@ import { DataCollectionModule } from './modules/data-collection/data-collection.
 import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-workflow.module';
 import { ConnectorModule } from './modules/connector/connector.module';
 import { DmaModule } from './modules/dma/dma.module';
+import { AiModule } from './modules/ai/ai.module';
+import { ReportingModule } from './modules/reporting/reporting.module';
+import { XbrlModule } from './modules/xbrl/xbrl.module';
 
 /**
  * Root application module.
@@ -39,6 +42,9 @@ import { DmaModule } from './modules/dma/dma.module';
     ApprovalWorkflowModule,
     ConnectorModule,
     DmaModule,
+    AiModule,
+    ReportingModule,
+    XbrlModule,
   ],
 })
 export class AppModule implements NestModule {
