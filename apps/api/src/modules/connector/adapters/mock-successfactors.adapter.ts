@@ -5,50 +5,174 @@ import type {
 } from './connector-adapter.port';
 
 /**
- * Mock SuccessFactors Adapter — simulates HR workforce data.
- * HR owns 22% of KPIs: ESRS 2, S1.
+ * SAP SuccessFactors OData API Response Format.
+ * Real SF uses OData v2 with $metadata entities like:
+ *   /odata/v2/User, /odata/v2/EmpEmployment, /odata/v2/FODivision
+ * This mock simulates the aggregated workforce analytics export
+ * from SF People Analytics / Workforce Analytics module.
  */
+interface SFWorkforcePayload {
+  d: {
+    __metadata: { uri: string; type: string };
+    reportingPeriod: string;
+    organizationId: string;
+    organizationName: string;
+    snapshot: {
+      headcount: {
+        total: number;
+        byGender: { male: number; female: number; nonBinary: number; undisclosed: number };
+        byContractType: { permanent: number; temporary: number; fixedTerm: number };
+        byWorkSchedule: { fullTime: number; partTime: number };
+        byAgeGroup: { under30: number; age30to50: number; over50: number };
+        byRegion: Array<{ regionCode: string; regionName: string; count: number }>;
+      };
+      nonEmployeeWorkers: {
+        contractors: number;
+        agencyWorkers: number;
+        total: number;
+      };
+      diversity: {
+        womenInManagement: number;
+        womenOnBoard: number;
+        disabilityRate: number;
+      };
+      turnover: {
+        voluntaryTerminations: number;
+        involuntaryTerminations: number;
+        voluntaryRate: number;
+        involuntaryRate: number;
+        totalRate: number;
+      };
+      compensation: {
+        genderPayGap: number;
+        ceoToMedianRatio: number;
+        minimumWageCompliance: boolean;
+        collectiveBargainingCoverage: number;
+      };
+      training: {
+        totalHoursDelivered: number;
+        averageHoursPerEmployee: number;
+        participationRate: number;
+        completionRate: number;
+      };
+      healthAndSafety: {
+        fatalities: number;
+        recordableIncidents: number;
+        lostTimeInjuries: number;
+        totalRecordableIncidentRate: number;
+        lostTimeInjuryFrequencyRate: number;
+        daysLostToInjury: number;
+        occupationalDiseases: number;
+      };
+      workLifeBalance: {
+        familyLeaveEntitled: number;
+        familyLeaveUsed: number;
+        entitlementRate: number;
+      };
+      socialProtection: {
+        adequateWages: boolean;
+      };
+    };
+  };
+}
+
 export class MockSuccessFactorsAdapter implements IConnectorAdapter {
   readonly connectorType = 'mock_successfactors';
   readonly displayName = 'SAP SuccessFactors (Mock)';
 
+  /** Generate a realistic SF OData response */
+  static generatePayload(): SFWorkforcePayload {
+    return {
+      d: {
+        __metadata: {
+          uri: "https://api.successfactors.eu/odata/v2/WorkforceAnalytics('2024')",
+          type: 'SFOData.WorkforceAnalyticsResult',
+        },
+        reportingPeriod: '2024',
+        organizationId: 'ACME_EU',
+        organizationName: 'Acme Corporation Europe',
+        snapshot: {
+          headcount: {
+            total: 34500,
+            byGender: { male: 22080, female: 12420, nonBinary: 0, undisclosed: 0 },
+            byContractType: { permanent: 31050, temporary: 2450, fixedTerm: 1000 },
+            byWorkSchedule: { fullTime: 31050, partTime: 3450 },
+            byAgeGroup: { under30: 6210, age30to50: 18975, over50: 9315 },
+            byRegion: [
+              { regionCode: 'EU-WEST', regionName: 'Western Europe', count: 18400 },
+              { regionCode: 'EU-EAST', regionName: 'Eastern Europe', count: 5200 },
+              { regionCode: 'APAC', regionName: 'Asia Pacific', count: 6900 },
+              { regionCode: 'AMER', regionName: 'Americas', count: 4000 },
+            ],
+          },
+          nonEmployeeWorkers: { contractors: 2800, agencyWorkers: 1400, total: 4200 },
+          diversity: { womenInManagement: 32, womenOnBoard: 40, disabilityRate: 3.8 },
+          turnover: {
+            voluntaryTerminations: 2829, involuntaryTerminations: 725,
+            voluntaryRate: 8.2, involuntaryRate: 2.1, totalRate: 10.3,
+          },
+          compensation: {
+            genderPayGap: 4.2, ceoToMedianRatio: 42,
+            minimumWageCompliance: true, collectiveBargainingCoverage: 65,
+          },
+          training: {
+            totalHoursDelivered: 845250, averageHoursPerEmployee: 24.5,
+            participationRate: 92, completionRate: 87,
+          },
+          healthAndSafety: {
+            fatalities: 0, recordableIncidents: 23, lostTimeInjuries: 12,
+            totalRecordableIncidentRate: 0.42, lostTimeInjuryFrequencyRate: 0.18,
+            daysLostToInjury: 412, occupationalDiseases: 5,
+          },
+          workLifeBalance: { familyLeaveEntitled: 34500, familyLeaveUsed: 4820, entitlementRate: 100 },
+          socialProtection: { adequateWages: true },
+        },
+      },
+    };
+  }
+
   validatePayload(raw: unknown): AdapterValidationResult {
-    if (!raw || typeof raw !== 'object') {
-      return { valid: false, errors: ['Payload must be a JSON object'] };
-    }
+    // In real mode, validate OData structure. In mock mode, accept anything.
     return { valid: true, errors: [] };
   }
 
-  transformToMetrics(_raw: unknown): NormalizedMetricValue[] {
+  transformToMetrics(raw: unknown): NormalizedMetricValue[] {
+    // Use realistic payload (ignore the incoming `raw` in mock mode)
+    const payload = MockSuccessFactorsAdapter.generatePayload();
+    const s = payload.d.snapshot;
+    const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+
     return [
-      // S1-6 Employee demographics
-      { metricCode: 'S1_6_EMPLOYEES_TOTAL', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 34500 }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_6_EMPLOYEES_FEMALE', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 12420 }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_6_EMPLOYEES_MALE', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 22080 }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_6_EMPLOYEES_PERMANENT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 31050 }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_6_EMPLOYEES_TEMPORARY', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 3450 }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_6_VOLUNTARY_TURNOVER_RATE', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 8.2 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
+      // Headcount
+      { ...period, metricCode: 'S1_6_EMPLOYEES_TOTAL', value: { numeric: s.headcount.total }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: `sf:${payload.d.organizationId}` },
+      { ...period, metricCode: 'S1_6_EMPLOYEES_FEMALE', value: { numeric: s.headcount.byGender.female }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: `sf:${payload.d.organizationId}` },
+      { ...period, metricCode: 'S1_6_EMPLOYEES_MALE', value: { numeric: s.headcount.byGender.male }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: `sf:${payload.d.organizationId}` },
+      { ...period, metricCode: 'S1_6_EMPLOYEES_PERMANENT', value: { numeric: s.headcount.byContractType.permanent }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: `sf:${payload.d.organizationId}` },
+      { ...period, metricCode: 'S1_6_EMPLOYEES_TEMPORARY', value: { numeric: s.headcount.byContractType.temporary + s.headcount.byContractType.fixedTerm }, unit: 'headcount', confidenceLevel: 'measured', sourceReference: `sf:${payload.d.organizationId}` },
 
-      // S1-8 Collective bargaining
-      { metricCode: 'S1_8_COLLECTIVE_BARGAINING_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 65 }, unit: '%', confidenceLevel: 'measured', sourceReference: 'successfactors' },
+      // Turnover
+      { ...period, metricCode: 'S1_6_VOLUNTARY_TURNOVER_RATE', value: { numeric: s.turnover.voluntaryRate }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:turnover_analytics` },
 
-      // S1-9 Diversity
-      { metricCode: 'S1_9_WOMEN_MANAGEMENT_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 32 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
-      { metricCode: 'S1_9_WOMEN_BOARD_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 40 }, unit: '%', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_9_AGE_UNDER30_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 18 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
-      { metricCode: 'S1_9_AGE_30TO50_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 55 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
-      { metricCode: 'S1_9_AGE_OVER50_PCT', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 27 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
+      // Collective bargaining
+      { ...period, metricCode: 'S1_8_COLLECTIVE_BARGAINING_PCT', value: { numeric: s.compensation.collectiveBargainingCoverage }, unit: '%', confidenceLevel: 'measured', sourceReference: `sf:compensation_module` },
 
-      // S1-13 Training
-      { metricCode: 'S1_13_TRAINING_HOURS_PER_EMPLOYEE', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 24.5 }, unit: 'hours/employee', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
+      // Diversity
+      { ...period, metricCode: 'S1_9_WOMEN_MANAGEMENT_PCT', value: { numeric: s.diversity.womenInManagement }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:diversity_dashboard` },
+      { ...period, metricCode: 'S1_9_WOMEN_BOARD_PCT', value: { numeric: s.diversity.womenOnBoard }, unit: '%', confidenceLevel: 'measured', sourceReference: `sf:board_composition` },
+      { ...period, metricCode: 'S1_9_AGE_UNDER30_PCT', value: { numeric: Math.round(s.headcount.byAgeGroup.under30 / s.headcount.total * 100) }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:demographics` },
+      { ...period, metricCode: 'S1_9_AGE_30TO50_PCT', value: { numeric: Math.round(s.headcount.byAgeGroup.age30to50 / s.headcount.total * 100) }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:demographics` },
+      { ...period, metricCode: 'S1_9_AGE_OVER50_PCT', value: { numeric: Math.round(s.headcount.byAgeGroup.over50 / s.headcount.total * 100) }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:demographics` },
 
-      // S1-14 Health & Safety
-      { metricCode: 'S1_14_FATALITIES', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 0 }, unit: 'count', confidenceLevel: 'measured', sourceReference: 'successfactors' },
-      { metricCode: 'S1_14_TRIR', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 0.42 }, unit: 'rate', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
-      { metricCode: 'S1_14_LOST_TIME_INJURY_RATE', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 0.18 }, unit: 'rate', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
+      // Training
+      { ...period, metricCode: 'S1_13_TRAINING_HOURS_PER_EMPLOYEE', value: { numeric: s.training.averageHoursPerEmployee }, unit: 'hours/employee', confidenceLevel: 'calculated', sourceReference: `sf:learning_module` },
 
-      // S1-16 Pay gap
-      { metricCode: 'S1_16_GENDER_PAY_GAP', periodStart: '2024-01-01', periodEnd: '2024-12-31', value: { numeric: 4.2 }, unit: '%', confidenceLevel: 'calculated', sourceReference: 'successfactors' },
+      // Health & Safety
+      { ...period, metricCode: 'S1_14_FATALITIES', value: { numeric: s.healthAndSafety.fatalities }, unit: 'count', confidenceLevel: 'measured', sourceReference: `sf:ehs_module` },
+      { ...period, metricCode: 'S1_14_TRIR', value: { numeric: s.healthAndSafety.totalRecordableIncidentRate }, unit: 'rate', confidenceLevel: 'calculated', sourceReference: `sf:ehs_module` },
+      { ...period, metricCode: 'S1_14_LOST_TIME_INJURY_RATE', value: { numeric: s.healthAndSafety.lostTimeInjuryFrequencyRate }, unit: 'rate', confidenceLevel: 'calculated', sourceReference: `sf:ehs_module` },
+
+      // Pay equity
+      { ...period, metricCode: 'S1_16_GENDER_PAY_GAP', value: { numeric: s.compensation.genderPayGap }, unit: '%', confidenceLevel: 'calculated', sourceReference: `sf:compensation_analytics` },
     ];
   }
 }
