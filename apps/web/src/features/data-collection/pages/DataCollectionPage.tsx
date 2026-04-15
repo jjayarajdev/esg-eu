@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../../lib/api-client';
 import { useAuth } from '../../../providers/AuthProvider';
 import { SourceTooltip } from '../components/SourceTooltip';
+import { InlineEdit } from '../components/InlineEdit';
+import { FrameworkBadges } from '../components/FrameworkBadges';
 
 interface DataPoint {
   id: string; metric_code: string; metric_name: string; standard_code: string;
@@ -126,9 +128,19 @@ export function DataCollectionPage() {
                   <td className="px-4 py-3">
                     <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{dp.standard_code}</span>
                   </td>
-                  <td className="px-4 py-3 text-slate-700">{dp.metric_name}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-medium">
-                    {dp.numeric_value !== null ? Number(dp.numeric_value).toLocaleString() : dp.text_value || '—'}
+                  <td className="px-4 py-3 text-slate-700">
+                    {dp.metric_name}
+                    <FrameworkBadges metricCode={dp.metric_code} />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <InlineEdit
+                      value={dp.numeric_value !== null ? Number(dp.numeric_value) : null}
+                      onSave={async (val) => {
+                        await api(`/data/points/${dp.id}`, { method: 'PUT', body: { numericValue: val } });
+                        loadDataPoints();
+                      }}
+                      disabled={dp.status === 'approved' || dp.status === 'published'}
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <SourceTooltip source={dp.data_source || 'manual_entry'} />

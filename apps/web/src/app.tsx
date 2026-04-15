@@ -12,6 +12,8 @@ import { ReportListPage } from './features/reporting/pages/ReportListPage';
 import { ReportEditorPage } from './features/reporting/pages/ReportEditorPage';
 import { CsvUploadPage } from './features/data-collection/pages/CsvUploadPage';
 import { SetupPage } from './features/settings/pages/SetupPage';
+import { WorkflowBar } from './components/WorkflowBar';
+import { OnboardingWizard } from './components/OnboardingWizard';
 
 export function App() {
   return (
@@ -155,20 +157,13 @@ function AppShell() {
           </div>
         </header>
 
+        {/* Workflow progress bar */}
+        <WorkflowBar />
+
         {/* Page content */}
         <div className="p-8">
           {!tenant && tenants.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">ESG</div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Welcome to EU ESG Platform</h2>
-              <p className="text-slate-500 mb-6">Create your first tenant to begin ESRS compliance reporting.</p>
-              <button
-                onClick={handleCreateTenant}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Create Tenant
-              </button>
-            </div>
+            <OnboardingWizard onComplete={() => window.location.reload()} />
           ) : (
             <Routes>
               <Route path="/" element={<DashboardPage />} />
