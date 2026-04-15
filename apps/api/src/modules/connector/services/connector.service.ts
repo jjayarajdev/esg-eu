@@ -6,6 +6,9 @@ import type { IConnectorAdapter, NormalizedMetricValue } from '../adapters/conne
 import { CsvUploadAdapter } from '../adapters/csv-upload.adapter';
 import { MockEnablonAdapter } from '../adapters/mock-enablon.adapter';
 import { MockSuccessFactorsAdapter } from '../adapters/mock-successfactors.adapter';
+import { MockEcoVadisAdapter } from '../adapters/mock-ecovadis.adapter';
+import { MockEthicsPointAdapter } from '../adapters/mock-ethicspoint.adapter';
+import { MockSpheraAdapter } from '../adapters/mock-sphera.adapter';
 
 @Injectable()
 export class ConnectorService {
@@ -21,6 +24,9 @@ export class ConnectorService {
       new CsvUploadAdapter(),
       new MockEnablonAdapter(),
       new MockSuccessFactorsAdapter(),
+      new MockEcoVadisAdapter(),
+      new MockEthicsPointAdapter(),
+      new MockSpheraAdapter(),
     ];
     for (const adapter of adapterList) {
       this.adapters.set(adapter.connectorType, adapter);
