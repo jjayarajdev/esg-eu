@@ -166,21 +166,22 @@ export class ReportService {
     for (const section of report.metadata.sections) {
       if (section.status === 'pending') {
         const validDataPoints = section.dataPoints.filter((dp) => dp.value !== null);
-        if (validDataPoints.length > 0) {
-          const aiResult = await this.ai.synthesizeNarrative({
-            standardCode: section.standardCode,
-            standardName: section.standardName,
-            dataPoints: validDataPoints.map((dp) => ({
-              metricCode: dp.metricCode,
-              metricName: dp.metricName,
-              value: dp.value!,
-              unit: dp.unit || '',
-            })),
-          });
-          section.narrative = aiResult.text;
-          section.narrativeSource = 'ai_generated';
-          section.status = 'generated';
-        }
+        const aiResult = await this.ai.synthesizeNarrative({
+          standardCode: section.standardCode,
+          standardName: section.standardName,
+          dataPoints: validDataPoints.map((dp) => ({
+            metricCode: dp.metricCode,
+            metricName: dp.metricName,
+            value: dp.value!,
+            unit: dp.unit || '',
+          })),
+          additionalContext: validDataPoints.length === 0
+            ? 'No quantitative data points are available for this standard in the current reporting period. Generate a general policy and approach narrative based on typical ESRS disclosure requirements.'
+            : undefined,
+        });
+        section.narrative = aiResult.text;
+        section.narrativeSource = 'ai_generated';
+        section.status = 'generated';
       }
     }
 
