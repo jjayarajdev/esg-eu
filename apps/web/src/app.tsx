@@ -15,6 +15,7 @@ import { SetupPage } from './features/settings/pages/SetupPage';
 import { WorkflowBar } from './components/WorkflowBar';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { AiCopilot } from './components/chat/AiCopilot';
+import { ConnectorDetailPage } from './features/connectors/pages/ConnectorDetailPage';
 
 export function App() {
   return (
@@ -179,6 +180,7 @@ function AppShell() {
               <Route path="/reports" element={<ReportListPage />} />
               <Route path="/reports/:id" element={<ReportEditorPage />} />
               <Route path="/setup" element={<SetupPage />} />
+              <Route path="/connectors/:connectorType" element={<ConnectorDetailPage />} />
             </Routes>
           )}
         </div>

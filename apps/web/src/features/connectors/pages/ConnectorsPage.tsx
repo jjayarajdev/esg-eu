@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../../lib/api-client';
 import { useAuth } from '../../../providers/AuthProvider';
 
@@ -41,6 +42,7 @@ const DOMAIN_MAP: Record<string, string> = {
 
 export function ConnectorsPage() {
   const { tenant } = useAuth();
+  const navigate = useNavigate();
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
 
@@ -67,7 +69,8 @@ export function ConnectorsPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
         {connectors.map((c) => (
           <div key={c.connectorType}
-            className={`bg-white rounded-xl border border-slate-200 border-t-4 ${TYPE_COLORS[c.connectorType] || 'border-t-slate-300'} p-4 hover:shadow-sm transition-shadow`}>
+            onClick={() => navigate(`/connectors/${c.connectorType}`)}
+            className={`bg-white rounded-xl border border-slate-200 border-t-4 ${TYPE_COLORS[c.connectorType] || 'border-t-slate-300'} p-4 hover:shadow-md transition-shadow cursor-pointer`}>
             <div className="font-medium text-slate-800 text-sm">{c.displayName}</div>
             <div className="text-xs text-slate-400 mt-0.5">{DOMAIN_MAP[c.connectorType] || c.connectorType}</div>
             <div className="mt-2">
