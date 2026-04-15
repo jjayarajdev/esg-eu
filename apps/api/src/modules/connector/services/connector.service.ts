@@ -9,6 +9,12 @@ import { MockSuccessFactorsAdapter } from '../adapters/mock-successfactors.adapt
 import { MockEcoVadisAdapter } from '../adapters/mock-ecovadis.adapter';
 import { MockEthicsPointAdapter } from '../adapters/mock-ethicspoint.adapter';
 import { MockSpheraAdapter } from '../adapters/mock-sphera.adapter';
+import { MockSapS4HanaAdapter } from '../adapters/mock-sap-s4hana.adapter';
+import { MockWorkdayAdapter } from '../adapters/mock-workday.adapter';
+import { MockCdpAdapter } from '../adapters/mock-cdp.adapter';
+import { MockCelonisAdapter } from '../adapters/mock-celonis.adapter';
+import { MockCoupaAdapter } from '../adapters/mock-coupa.adapter';
+import { MockPowerBiAdapter } from '../adapters/mock-powerbi.adapter';
 
 @Injectable()
 export class ConnectorService {
@@ -27,6 +33,12 @@ export class ConnectorService {
       new MockEcoVadisAdapter(),
       new MockEthicsPointAdapter(),
       new MockSpheraAdapter(),
+      new MockSapS4HanaAdapter(),
+      new MockWorkdayAdapter(),
+      new MockCdpAdapter(),
+      new MockCelonisAdapter(),
+      new MockCoupaAdapter(),
+      new MockPowerBiAdapter(),
     ];
     for (const adapter of adapterList) {
       this.adapters.set(adapter.connectorType, adapter);

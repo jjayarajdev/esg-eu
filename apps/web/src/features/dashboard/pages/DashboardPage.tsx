@@ -76,7 +76,7 @@ export function DashboardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="text-sm font-medium text-slate-500 mb-3">Connected Sources</div>
           <div className="space-y-2">
-            {['Enablon (HSE&S)', 'SuccessFactors (HR)', 'EcoVadis (Procurement)', 'EthicsPoint (Legal)', 'Sphera (Product Safety)', 'CSV Upload'].map((s) => (
+            {['Enablon (HSE&S)', 'SuccessFactors (HR)', 'SAP S/4HANA (ERP)', 'EcoVadis (Procurement)', 'EthicsPoint (Legal)', 'Sphera (Product Safety)', 'Workday (HR)', 'CDP (Climate)', 'Celonis (Process)', 'Coupa (Procurement)', 'Power BI (BI)', 'CSV Upload'].map((s) => (
               <div key={s} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-400" />
                 <span className="text-sm text-slate-600">{s}</span>

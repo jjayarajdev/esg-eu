@@ -77,12 +77,16 @@ export function DataCollectionPage() {
           Upload CSV
         </button>
         <div className="h-6 w-px bg-slate-200" />
-        {['mock_enablon', 'mock_successfactors', 'mock_ecovadis', 'mock_ethicspoint', 'mock_sphera'].map((c) => {
-          const label = c.replace('mock_', '');
+        {[
+          'mock_enablon', 'mock_successfactors', 'mock_sap_s4hana', 'mock_ecovadis',
+          'mock_ethicspoint', 'mock_sphera', 'mock_workday', 'mock_cdp', 'mock_celonis',
+          'mock_coupa', 'mock_powerbi',
+        ].map((c) => {
+          const label = c.replace('mock_', '').replace(/_/g, ' ');
           return (
             <button key={c} onClick={() => ingestMockData(c)} disabled={importing === c}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition-colors disabled:opacity-50">
-              {importing === c ? '...' : label.charAt(0).toUpperCase() + label.slice(1)}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition-colors disabled:opacity-50 capitalize">
+              {importing === c ? '...' : label}
             </button>
           );
         })}
