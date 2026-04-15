@@ -5,6 +5,9 @@ import { DataCollectionPage } from './features/data-collection/pages/DataCollect
 import { ApprovalsPage } from './features/approvals/pages/ApprovalsPage';
 import { ConnectorsPage } from './features/connectors/pages/ConnectorsPage';
 import { DataEntryPage } from './features/data-collection/pages/DataEntryPage';
+import { DmaListPage } from './features/dma/pages/DmaListPage';
+import { DmaWizardPage } from './features/dma/pages/DmaWizardPage';
+import { MaterialityMatrixPage } from './features/dma/pages/MaterialityMatrixPage';
 
 export function App() {
   return (
@@ -92,7 +95,9 @@ function AppShell() {
           <Route path="/data/new" element={<DataEntryPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/connectors" element={<ConnectorsPage />} />
-            <Route path="/dma" element={<PlaceholderPage title="Double Materiality Assessment" />} />
+            <Route path="/dma" element={<DmaListPage />} />
+          <Route path="/dma/:id" element={<DmaWizardPage />} />
+          <Route path="/dma/:id/matrix" element={<MaterialityMatrixPage />} />
             <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
           </Routes>
         )}

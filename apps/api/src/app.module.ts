@@ -10,6 +10,7 @@ import { TenantModule } from './modules/tenant/tenant.module';
 import { DataCollectionModule } from './modules/data-collection/data-collection.module';
 import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-workflow.module';
 import { ConnectorModule } from './modules/connector/connector.module';
+import { DmaModule } from './modules/dma/dma.module';
 
 /**
  * Root application module.
@@ -37,6 +38,7 @@ import { ConnectorModule } from './modules/connector/connector.module';
     DataCollectionModule,
     ApprovalWorkflowModule,
     ConnectorModule,
+    DmaModule,
   ],
 })
 export class AppModule implements NestModule {
