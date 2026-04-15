@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../../lib/api-client';
 import { useAuth } from '../../../providers/AuthProvider';
 
@@ -70,6 +71,8 @@ export function DataCollectionPage() {
     loadDataPoints();
   }
 
+  const navigate = useNavigate();
+
   if (!tenant) return <p>Select a tenant to view data.</p>;
 
   return (
@@ -77,8 +80,11 @@ export function DataCollectionPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>Data Collection</h2>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => navigate('/data/new')} style={{ ...btnStyle, background: '#10b981' }}>
+            Enter Data
+          </button>
           <button onClick={() => ingestMockData('mock_enablon')} style={btnStyle}>
-            Import Enablon Data
+            Import Enablon
           </button>
           <button onClick={() => ingestMockData('mock_successfactors')} style={btnStyle}>
             Import SuccessFactors Data

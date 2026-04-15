@@ -4,6 +4,7 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { DataCollectionPage } from './features/data-collection/pages/DataCollectionPage';
 import { ApprovalsPage } from './features/approvals/pages/ApprovalsPage';
 import { ConnectorsPage } from './features/connectors/pages/ConnectorsPage';
+import { DataEntryPage } from './features/data-collection/pages/DataEntryPage';
 
 export function App() {
   return (
@@ -88,6 +89,7 @@ function AppShell() {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/data" element={<DataCollectionPage />} />
+          <Route path="/data/new" element={<DataEntryPage />} />
             <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/connectors" element={<ConnectorsPage />} />
             <Route path="/dma" element={<PlaceholderPage title="Double Materiality Assessment" />} />

@@ -40,23 +40,23 @@
 - [ ] Evidence upload (presigned MinIO URLs) — deferred to Wave 5
 - [x] Audit trail (every change logged)
 
-### Wave 4: Approval Workflow Module
-- [ ] Generic workflow engine (any entity type)
-- [ ] Multi-step approval chain
-- [ ] Approve/reject with comments
-- [ ] Domain events (WorkflowCompleted, WorkflowRejected)
+### Wave 4: Approval Workflow Module — DONE
+- [x] Generic workflow engine (any entity type)
+- [x] Multi-step approval chain
+- [x] Approve/reject with comments
+- [x] Domain events (WorkflowCompleted, WorkflowRejected)
 
-### Wave 5: Connector Module
-- [ ] IConnectorAdapter interface + NormalizedMetricValue
-- [ ] CSV upload adapter
-- [ ] Mock Enablon adapter (HSE&S data)
-- [ ] Mock SuccessFactors adapter (HR data)
-- [ ] Push ingestion endpoint
+### Wave 5: Connector Module — DONE
+- [x] IConnectorAdapter interface + NormalizedMetricValue
+- [x] CSV upload adapter
+- [x] Mock Enablon adapter (15 HSE&S metrics)
+- [x] Mock SuccessFactors adapter (17 HR metrics)
+- [x] Push ingestion endpoint + auto-upsert
 
-### Wave 6-7: Wire + Frontend
-- [ ] Register all modules in AppModule
-- [ ] API client + mock auth provider (React)
-- [ ] Data collection page (metric grid + entry form)
+### Wave 6-7: Wire + Frontend — DONE
+- [x] All modules registered in AppModule
+- [x] API client + mock auth provider (React)
+- [x] Data collection page (metric grid + import buttons)
 - [ ] Approval inbox page
 - [ ] Connector management page
 
