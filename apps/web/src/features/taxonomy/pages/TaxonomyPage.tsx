@@ -84,15 +84,69 @@ export function TaxonomyPage() {
 
   if (!tenant) return <p className="text-slate-500">Select a tenant first.</p>;
 
+  const [showHelp, setShowHelp] = useState(false);
+
   return (
     <div>
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-4">
         <div>
-          <p className="text-sm text-slate-500 mt-1">Classify your economic activities against the EU Taxonomy's 6 environmental objectives.</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-slate-500 mt-1">Determine which of your economic activities qualify as environmentally sustainable under EU law.</p>
+            <button onClick={() => setShowHelp(!showHelp)}
+              className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center hover:bg-blue-200 flex-shrink-0 mt-1"
+              title="What is EU Taxonomy?">?</button>
+          </div>
         </div>
-        {!assessment && <button onClick={createAssessment} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium">New Assessment</button>}
-        {assessment && <button onClick={calculateKPIs} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium">Calculate KPIs</button>}
+        {!assessment && <button onClick={createAssessment} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium flex-shrink-0">New Assessment</button>}
+        {assessment && <button onClick={calculateKPIs} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium flex-shrink-0">Calculate KPIs</button>}
       </div>
+
+      {/* Help panel */}
+      {showHelp && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-5 text-sm">
+          <div className="flex justify-between items-start">
+            <h3 className="font-semibold text-blue-800 mb-2">What is EU Taxonomy Alignment?</h3>
+            <button onClick={() => setShowHelp(false)} className="text-blue-400 hover:text-blue-600">&times;</button>
+          </div>
+          <p className="text-blue-700 mb-3">
+            The EU Taxonomy is a classification system that defines which economic activities are
+            <strong> environmentally sustainable</strong>. Companies under CSRD must disclose what percentage
+            of their revenue, capital expenditure, and operating expenditure comes from taxonomy-aligned activities.
+          </p>
+          <div className="grid grid-cols-2 gap-4 mb-3">
+            <div>
+              <h4 className="font-semibold text-blue-800 mb-1">The 4-Step Screening Process</h4>
+              <ol className="list-decimal list-inside space-y-1 text-blue-600">
+                <li><strong>Eligibility</strong> — Is the activity listed in the EU Taxonomy?</li>
+                <li><strong>Technical Criteria</strong> — Does it meet quantitative performance thresholds?</li>
+                <li><strong>DNSH</strong> — Does it avoid significant harm to the other 5 environmental objectives?</li>
+                <li><strong>Social Safeguards</strong> — Does it comply with OECD and UN human rights guidelines?</li>
+              </ol>
+              <p className="text-blue-500 text-xs mt-2">An activity is <strong>aligned</strong> only if all 4 steps pass.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-blue-800 mb-1">6 Environmental Objectives</h4>
+              <ul className="space-y-1 text-blue-600">
+                <li>1. Climate change mitigation</li>
+                <li>2. Climate change adaptation</li>
+                <li>3. Sustainable use of water and marine resources</li>
+                <li>4. Transition to a circular economy</li>
+                <li>5. Pollution prevention and control</li>
+                <li>6. Protection of biodiversity and ecosystems</li>
+              </ul>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-3 border border-blue-100">
+            <h4 className="font-semibold text-blue-800 mb-1">3 KPIs You Must Report</h4>
+            <div className="grid grid-cols-3 gap-3 text-xs text-blue-600">
+              <div><strong>Turnover %</strong> — Revenue from aligned activities as % of total revenue</div>
+              <div><strong>CapEx %</strong> — Capital expenditure on aligned activities as % of total CapEx</div>
+              <div><strong>OpEx %</strong> — Operating expenditure on aligned activities as % of total OpEx</div>
+            </div>
+            <p className="text-blue-500 text-[10px] mt-2">These percentages are used by investors and banks to assess your company's sustainability profile and eligibility for green finance.</p>
+          </div>
+        </div>
+      )}
 
       {/* KPI summary */}
       {assessment && (assessment.turnover_aligned_pct !== null) && (
