@@ -7,14 +7,25 @@ interface DmaAssessment {
   id: string;
   name: string;
   status: string;
+  methodology: any;
   created_at: string;
   finalized_at: string | null;
+  topics?: Array<{ standard_code: string; standard_name: string; standard_category: string; impact_score: number | null; financial_score: number | null; is_material: boolean | null }>;
 }
 
-interface Period {
-  id: string;
-  name: string;
-}
+interface Period { id: string; name: string; }
+
+const STATUS_CONFIG: Record<string, { bg: string; label: string }> = {
+  draft: { bg: 'bg-slate-100 text-slate-600', label: 'Draft' },
+  in_progress: { bg: 'bg-amber-100 text-amber-700', label: 'In Progress' },
+  finalized: { bg: 'bg-emerald-100 text-emerald-700', label: 'Finalized' },
+};
+
+const CAT_COLORS: Record<string, string> = {
+  environmental: 'bg-emerald-500',
+  social: 'bg-blue-500',
+  governance: 'bg-amber-500',
+};
 
 export function DmaListPage() {
   const { tenant } = useAuth();
@@ -24,15 +35,16 @@ export function DmaListPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (tenant) {
-      loadAssessments();
-      loadPeriods();
-    }
+    if (tenant) { loadAssessments(); loadPeriods(); }
   }, [tenant]);
 
   async function loadAssessments() {
     const res = await api<{ data: DmaAssessment[] }>('/dma');
-    setAssessments(res.data);
+    // Load full details for each assessment
+    const detailed = await Promise.all(
+      res.data.map((a) => api<{ data: DmaAssessment }>(`/dma/${a.id}`).then((r) => r.data)),
+    );
+    setAssessments(detailed);
   }
 
   async function loadPeriods() {
@@ -41,91 +53,121 @@ export function DmaListPage() {
   }
 
   async function createAssessment() {
-    if (periods.length === 0) {
-      alert('Create a reporting period first (Data Collection > enter a period).');
-      return;
-    }
+    if (periods.length === 0) { alert('Create a reporting period first.'); return; }
     setCreating(true);
     try {
       const res = await api<{ data: DmaAssessment }>('/dma', {
         method: 'POST',
-        body: {
-          reportingPeriodId: periods[0].id,
-          name: `${periods[0].name} Double Materiality Assessment`,
-        },
+        body: { reportingPeriodId: periods[0].id, name: `${periods[0].name} Double Materiality Assessment` },
       });
       navigate(`/dma/${res.data.id}`);
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setCreating(false);
-    }
+    } catch (err: any) { alert(err.message); }
+    finally { setCreating(false); }
   }
 
-  if (!tenant) return <p>Select a tenant first.</p>;
+  if (!tenant) return <p className="text-slate-500">Select a tenant first.</p>;
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Double Materiality Assessment</h2>
-        <button onClick={createAssessment} disabled={creating} style={primaryBtn}>
+      {/* Header */}
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <p className="text-slate-500 text-sm mt-1 max-w-2xl">
+            The Double Materiality Assessment determines which ESRS topics are material for your organization.
+            Score each of the 10 topical standards on <strong>impact materiality</strong> (how you affect the world)
+            and <strong>financial materiality</strong> (how sustainability risks affect your business).
+          </p>
+        </div>
+        <button onClick={createAssessment} disabled={creating}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors flex-shrink-0 disabled:opacity-50">
           {creating ? 'Creating...' : 'New Assessment'}
         </button>
       </div>
 
-      <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
-        Score each ESRS topic on impact materiality (how you affect the world) and financial materiality
-        (how sustainability risks affect your business). Topics meeting the threshold become material and
-        require reporting.
-      </p>
+      {/* How it works */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {[
+          { step: '1', title: 'Score Topics', desc: 'Rate severity, likelihood, magnitude, and probability for each ESRS standard', color: 'border-t-blue-500' },
+          { step: '2', title: 'Review Matrix', desc: 'Visualize impact vs. financial materiality on a scatter plot', color: 'border-t-violet-500' },
+          { step: '3', title: 'Finalize', desc: 'Lock material topics — they flow into reporting and data collection', color: 'border-t-emerald-500' },
+        ].map((s) => (
+          <div key={s.step} className={`bg-white rounded-xl border border-slate-200 border-t-4 ${s.color} p-5`}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-600">{s.step}</span>
+              <span className="font-semibold text-slate-800">{s.title}</span>
+            </div>
+            <p className="text-sm text-slate-500">{s.desc}</p>
+          </div>
+        ))}
+      </div>
 
+      {/* Assessments */}
       {assessments.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', border: '1px dashed #d1d5db', borderRadius: '8px' }}>
-          <p style={{ color: '#6b7280' }}>No assessments yet. Create one to get started.</p>
+        <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
+          <div className="text-4xl mb-3">DMA</div>
+          <p className="text-slate-500 mb-4">No assessments yet. Create one to begin scoring ESRS topics.</p>
+          <button onClick={createAssessment} disabled={creating}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors">
+            Create First Assessment
+          </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {assessments.map((a) => (
-            <div
-              key={a.id}
-              onClick={() => navigate(a.status === 'finalized' ? `/dma/${a.id}/matrix` : `/dma/${a.id}`)}
-              style={{
-                padding: '1rem 1.5rem',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <div style={{ fontWeight: 600 }}>{a.name}</div>
-                <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
-                  Created {new Date(a.created_at).toLocaleDateString()}
-                  {a.finalized_at && ` — Finalized ${new Date(a.finalized_at).toLocaleDateString()}`}
+        <div className="space-y-4">
+          {assessments.map((a) => {
+            const scored = a.topics?.filter((t) => t.impact_score !== null).length || 0;
+            const total = a.topics?.length || 10;
+            const material = a.topics?.filter((t) => t.is_material === true).length || 0;
+            const statusCfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.draft;
+
+            return (
+              <div key={a.id}
+                onClick={() => navigate(a.status === 'finalized' ? `/dma/${a.id}/matrix` : `/dma/${a.id}`)}
+                className="bg-white rounded-xl border border-slate-200 p-5 cursor-pointer hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-semibold text-slate-800">{a.name}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      Created {new Date(a.created_at).toLocaleDateString()}
+                      {a.finalized_at && ` \u2014 Finalized ${new Date(a.finalized_at).toLocaleDateString()}`}
+                    </div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${statusCfg.bg}`}>
+                    {statusCfg.label}
+                  </span>
                 </div>
+
+                {/* Progress bar */}
+                <div className="mb-3">
+                  <div className="flex justify-between text-xs text-slate-500 mb-1">
+                    <span>{scored}/{total} topics scored</span>
+                    {a.status === 'finalized' && <span className="text-emerald-600 font-medium">{material} material topics</span>}
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full">
+                    <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(scored / total) * 100}%` }} />
+                  </div>
+                </div>
+
+                {/* Topic pills */}
+                {a.topics && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {a.topics.map((t) => (
+                      <span key={t.standard_code} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
+                        t.is_material === true ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' :
+                        t.is_material === false ? 'bg-slate-50 text-slate-400' :
+                        t.impact_score !== null ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${CAT_COLORS[t.standard_category] || 'bg-slate-300'}`} />
+                        {t.standard_code}
+                        {t.impact_score !== null && <span className="text-[10px] opacity-60">{t.impact_score}/{t.financial_score}</span>}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-              <span style={{
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                background: a.status === 'finalized' ? '#10b981' : a.status === 'in_progress' ? '#f59e0b' : '#6b7280',
-                color: 'white',
-              }}>
-                {a.status}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
-
-const primaryBtn: React.CSSProperties = {
-  padding: '0.5rem 1rem', background: '#3b82f6', color: 'white',
-  border: 'none', borderRadius: '6px', cursor: 'pointer',
-};
