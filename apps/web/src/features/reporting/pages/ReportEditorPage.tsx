@@ -66,6 +66,21 @@ export function ReportEditorPage() {
     await loadReport();
   }
 
+  async function exportFile(path: string, filename: string) {
+    try {
+      const res = await fetch(`/api/v1${path}`, {
+        headers: { 'X-Tenant-Id': (window as any).__tenantId || '' },
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) { alert(err.message); }
+  }
+
   async function finalize() {
     try {
       await api(`/reports/${id}/finalize`, { method: 'POST' });
@@ -94,14 +109,14 @@ export function ReportEditorPage() {
             </>
           )}
           {report.status === 'finalized' && (
-            <a href={`/api/v1/reports/${id}/export/html`} target="_blank" style={{ ...btn, background: '#1e40af', textDecoration: 'none' }}>
+            <button onClick={() => exportFile(`/reports/${id}/export/html`, `esrs-report-${id}.html`)} style={{ ...btn, background: '#1e40af' }}>
               Export HTML
-            </a>
+            </button>
           )}
           {report.status === 'finalized' && (
-            <a href={`/api/v1/xbrl/${id}`} target="_blank" style={{ ...btn, background: '#dc2626', textDecoration: 'none' }}>
+            <button onClick={() => exportFile(`/xbrl/${id}`, `esrs-report-${id}.xhtml`)} style={{ ...btn, background: '#dc2626' }}>
               Export iXBRL
-            </a>
+            </button>
           )}
         </div>
       </div>

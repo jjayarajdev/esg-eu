@@ -5,6 +5,8 @@ let currentTenantId: string | null = null;
 
 export function setTenantId(id: string) {
   currentTenantId = id;
+  // Also store on window for non-api-client fetches (e.g., file downloads)
+  (window as any).__tenantId = id;
 }
 
 export function getTenantId(): string | null {
