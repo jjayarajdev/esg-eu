@@ -5,6 +5,7 @@ import { useAuth } from '../../../providers/AuthProvider';
 import { SourceTooltip } from '../components/SourceTooltip';
 import { InlineEdit } from '../components/InlineEdit';
 import { FrameworkBadges } from '../components/FrameworkBadges';
+import { DataPointDetail } from '../components/DataPointDetail';
 
 interface DataPoint {
   id: string; metric_code: string; metric_name: string; standard_code: string;
@@ -30,6 +31,7 @@ export function DataCollectionPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   useEffect(() => { if (tenant) loadPeriods(); }, [tenant]);
   useEffect(() => { if (selectedPeriod) loadDataPoints(); }, [selectedPeriod]);
@@ -128,8 +130,11 @@ export function DataCollectionPage() {
                   <td className="px-4 py-3">
                     <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{dp.standard_code}</span>
                   </td>
-                  <td className="px-4 py-3 text-slate-700">
-                    {dp.metric_name}
+                  <td className="px-4 py-3">
+                    <span onClick={() => setDetailId(dp.id)}
+                      className="text-slate-700 hover:text-blue-600 cursor-pointer hover:underline">
+                      {dp.metric_name}
+                    </span>
                     <FrameworkBadges metricCode={dp.metric_code} />
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -160,6 +165,11 @@ export function DataCollectionPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Data point detail modal */}
+      {detailId && (
+        <DataPointDetail dataPointId={detailId} onClose={() => setDetailId(null)} />
       )}
     </div>
   );

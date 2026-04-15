@@ -23,4 +23,11 @@ export class AiController {
     const result = await this.service.synthesizeNarrative(dto);
     return { data: result };
   }
+
+  @Post('chat')
+  @ApiOperation({ summary: 'AI Copilot — ask questions about ESRS, CSRD, ESG' })
+  async chat(@Body() body: { question: string }) {
+    const result = await this.service.chat(body.question);
+    return { data: result };
+  }
 }

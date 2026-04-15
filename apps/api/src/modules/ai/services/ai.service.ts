@@ -89,6 +89,27 @@ Write a comprehensive disclosure narrative (2-4 paragraphs) that:
     return { text: response.text };
   }
 
+  async chat(question: string): Promise<{ text: string }> {
+    const response = await this.provider.generateText({
+      systemPrompt: `${ESG_SYSTEM_PROMPT}
+
+You are an AI Copilot embedded in an ESRS compliance platform. Answer questions about:
+- ESRS standards (E1-E5, S1-S4, G1) and disclosure requirements
+- Double materiality assessment methodology
+- EU Taxonomy alignment and reporting
+- GHG Protocol emissions calculation
+- CSRD compliance timelines and requirements
+- ESG data collection best practices
+
+Be concise (2-3 paragraphs max). Reference specific ESRS standards and disclosure codes when relevant.`,
+      userPrompt: question,
+      maxTokens: 500,
+    });
+
+    await this.logRequest('copilot_chat', response.model, response.promptTokens, response.completionTokens, { question }, response.text);
+    return { text: response.text };
+  }
+
   private async logRequest(
     requestType: string,
     model: string,

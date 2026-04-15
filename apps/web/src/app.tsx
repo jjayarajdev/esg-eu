@@ -14,6 +14,7 @@ import { CsvUploadPage } from './features/data-collection/pages/CsvUploadPage';
 import { SetupPage } from './features/settings/pages/SetupPage';
 import { WorkflowBar } from './components/WorkflowBar';
 import { OnboardingWizard } from './components/OnboardingWizard';
+import { AiCopilot } from './components/chat/AiCopilot';
 
 export function App() {
   return (
@@ -182,6 +183,9 @@ function AppShell() {
           )}
         </div>
       </main>
+
+      {/* AI Copilot floating chat */}
+      <AiCopilot />
     </div>
   );
 }
