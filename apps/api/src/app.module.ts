@@ -9,6 +9,7 @@ import { MockAuthMiddleware } from './infrastructure/auth/mock-auth.middleware';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { DataCollectionModule } from './modules/data-collection/data-collection.module';
 import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-workflow.module';
+import { ConnectorModule } from './modules/connector/connector.module';
 
 /**
  * Root application module.
@@ -35,7 +36,7 @@ import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-wor
     TenantModule,
     DataCollectionModule,
     ApprovalWorkflowModule,
-    // ConnectorModule,    // Wave 5
+    ConnectorModule,
   ],
 })
 export class AppModule implements NestModule {
