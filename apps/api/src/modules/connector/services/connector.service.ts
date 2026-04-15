@@ -160,22 +160,19 @@ export class ConnectorService {
     connectorType: string,
     ingestionRunId: string,
   ): Promise<void> {
-    // Upsert: if metric+period already exists, update; otherwise insert
+    // Delete existing value for same metric+period+source, then insert fresh
+    // (NULL department_id breaks ON CONFLICT, so we use delete-insert pattern)
+    await this.db.query(
+      `DELETE FROM metric_values
+       WHERE metric_def_id = $1 AND reporting_period_id = $2 AND data_source = $3`,
+      [metric.metricCode, reportingPeriodId, connectorType],
+    );
+
     await this.db.query(
       `INSERT INTO metric_values
        (metric_def_id, reporting_period_id, numeric_value, text_value, boolean_value,
         status, confidence_level, data_source, source_ingestion_id)
-       VALUES ($1, $2, $3, $4, $5, 'draft', $6, $7, $8)
-       ON CONFLICT (metric_def_id, reporting_period_id, department_id)
-       DO UPDATE SET
-         numeric_value = EXCLUDED.numeric_value,
-         text_value = EXCLUDED.text_value,
-         boolean_value = EXCLUDED.boolean_value,
-         confidence_level = EXCLUDED.confidence_level,
-         data_source = EXCLUDED.data_source,
-         source_ingestion_id = EXCLUDED.source_ingestion_id,
-         version = metric_values.version + 1,
-         updated_at = now()`,
+       VALUES ($1, $2, $3, $4, $5, 'draft', $6, $7, $8)`,
       [
         metric.metricCode,
         reportingPeriodId,
