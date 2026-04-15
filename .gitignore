@@ -6,6 +6,12 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+# Compiled TS in source directories (build artifacts from tsc -b)
+modules/*/src/**/*.js
+modules/*/src/**/*.js.map
+modules/*/src/**/*.d.ts
+modules/*/src/**/*.d.ts.map
+packages/*/dist/
 
 # Environment
 .env

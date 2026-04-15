@@ -1,3 +1,4 @@
 // @esg/mod-tenant — Public API
-// Export module and public types/services here
-export {};
+export { TenantModule } from './tenant.module';
+export { TenantService } from './tenant.service';
+export type { CreateTenantDto, TenantRow } from './tenant.service';

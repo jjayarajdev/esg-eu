@@ -1,17 +1,18 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './infrastructure/health/health.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
+import { AppClsModule } from './infrastructure/cls/cls.module';
+import { EventBusModule } from './infrastructure/events/event-bus.module';
+import { AuditModule } from './infrastructure/audit/audit.module';
+import { MockAuthMiddleware } from './infrastructure/auth/mock-auth.middleware';
+import { TenantModule } from './modules/tenant/tenant.module';
+import { DataCollectionModule } from './modules/data-collection/data-collection.module';
+import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-workflow.module';
 
 /**
  * Root application module.
- * Composes all domain modules and infrastructure.
- *
- * Domain modules will be added here as they are built:
- *   Phase 1: TenantModule, DataCollectionModule, ConnectorModule, ApprovalWorkflowModule
- *   Phase 2: ReportingModule, XbrlModule
- *   Phase 3: DmaModule
- *   Phase 4: AiModule
- *   Phase 5: TaxonomyAlignmentModule, SfdrModule
+ * Composes infrastructure and domain modules.
  */
 @Module({
   imports: [
@@ -21,20 +22,28 @@ import { HealthModule } from './infrastructure/health/health.module';
       envFilePath: ['.env.local', '.env'],
     }),
 
-    // Health check endpoint
+    // Infrastructure (Wave 1)
+    AppClsModule,
+    DatabaseModule,
+    EventBusModule,
+    AuditModule,
+
+    // Health check
     HealthModule,
 
-    // Domain modules (added as built)
-    // TenantModule,
-    // DataCollectionModule,
-    // ConnectorModule,
-    // ApprovalWorkflowModule,
-    // ReportingModule,
-    // XbrlModule,
-    // DmaModule,
-    // AiModule,
-    // TaxonomyAlignmentModule,
-    // SfdrModule,
+    // Domain modules
+    TenantModule,
+    DataCollectionModule,
+    ApprovalWorkflowModule,
+    // ConnectorModule,    // Wave 5
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply mock auth to all routes except health and tenant creation
+    consumer
+      .apply(MockAuthMiddleware)
+      .exclude('health', 'api/v1/health')
+      .forRoutes('*');
+  }
+}
