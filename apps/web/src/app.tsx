@@ -11,6 +11,7 @@ import { MaterialityMatrixPage } from './features/dma/pages/MaterialityMatrixPag
 import { ReportListPage } from './features/reporting/pages/ReportListPage';
 import { ReportEditorPage } from './features/reporting/pages/ReportEditorPage';
 import { CsvUploadPage } from './features/data-collection/pages/CsvUploadPage';
+import { SetupPage } from './features/settings/pages/SetupPage';
 
 export function App() {
   return (
@@ -42,6 +43,7 @@ const NAV_SECTIONS = [
     items: [
       { to: '/approvals', label: 'Approvals', icon: 'A' },
       { to: '/connectors', label: 'Connectors', icon: 'C' },
+      { to: '/setup', label: 'Setup', icon: 'S' },
     ],
   },
 ];
@@ -180,6 +182,7 @@ function AppShell() {
               <Route path="/dma/:id/matrix" element={<MaterialityMatrixPage />} />
               <Route path="/reports" element={<ReportListPage />} />
               <Route path="/reports/:id" element={<ReportEditorPage />} />
+              <Route path="/setup" element={<SetupPage />} />
             </Routes>
           )}
         </div>
