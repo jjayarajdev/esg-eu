@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../lib/api-client';
 import { useAuth } from '../../../providers/AuthProvider';
+import { SourceTooltip } from '../components/SourceTooltip';
 
 interface DataPoint {
   id: string; metric_code: string; metric_name: string; standard_code: string;
@@ -129,7 +130,9 @@ export function DataCollectionPage() {
                   <td className="px-4 py-3 text-right tabular-nums font-medium">
                     {dp.numeric_value !== null ? Number(dp.numeric_value).toLocaleString() : dp.text_value || '—'}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-400">{dp.data_source || 'manual'}</td>
+                  <td className="px-4 py-3">
+                    <SourceTooltip source={dp.data_source || 'manual_entry'} />
+                  </td>
                   <td className="px-4 py-3 text-right text-xs">
                     {dp.variance_pct !== null ? (
                       <span className={dp.variance_pct > 0 ? 'text-red-600' : 'text-emerald-600'}>
