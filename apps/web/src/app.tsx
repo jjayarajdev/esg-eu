@@ -16,13 +16,19 @@ import { WorkflowBar } from './components/WorkflowBar';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { AiCopilot } from './components/chat/AiCopilot';
 import { ConnectorDetailPage } from './features/connectors/pages/ConnectorDetailPage';
+import { TaxonomyPage } from './features/taxonomy/pages/TaxonomyPage';
+import { SupplyChainPage } from './features/supply-chain/pages/SupplyChainPage';
+import { SupplierPortalPage } from './features/supply-chain/pages/SupplierPortalPage';
 
 export function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppShell />
-      </AuthProvider>
+      <Routes>
+        {/* Supplier portal — standalone, no auth, no sidebar */}
+        <Route path="/portal/:token" element={<SupplierPortalPage />} />
+        {/* Main app */}
+        <Route path="*" element={<AuthProvider><AppShell /></AuthProvider>} />
+      </Routes>
     </BrowserRouter>
   );
 }
@@ -40,6 +46,7 @@ const NAV_SECTIONS = [
       { to: '/dma', label: 'DMA', icon: 'M' },
       { to: '/data', label: 'Data Collection', icon: 'D' },
       { to: '/reports', label: 'Reports', icon: 'R' },
+      { to: '/taxonomy', label: 'EU Taxonomy', icon: 'T' },
     ],
   },
   {
@@ -47,6 +54,7 @@ const NAV_SECTIONS = [
     items: [
       { to: '/approvals', label: 'Approvals', icon: 'A' },
       { to: '/connectors', label: 'Connectors', icon: 'C' },
+      { to: '/supply-chain', label: 'Supply Chain', icon: 'V' },
       { to: '/setup', label: 'Setup', icon: 'S' },
     ],
   },
@@ -181,6 +189,9 @@ function AppShell() {
               <Route path="/reports/:id" element={<ReportEditorPage />} />
               <Route path="/setup" element={<SetupPage />} />
               <Route path="/connectors/:connectorType" element={<ConnectorDetailPage />} />
+              <Route path="/taxonomy" element={<TaxonomyPage />} />
+              <Route path="/supply-chain" element={<SupplyChainPage />} />
+              <Route path="/supply-chain/:id" element={<SupplyChainPage />} />
             </Routes>
           )}
         </div>

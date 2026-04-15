@@ -14,6 +14,8 @@ import { DmaModule } from './modules/dma/dma.module';
 import { AiModule } from './modules/ai/ai.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { XbrlModule } from './modules/xbrl/xbrl.module';
+import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
+import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 
 /**
  * Root application module.
@@ -45,6 +47,8 @@ import { XbrlModule } from './modules/xbrl/xbrl.module';
     AiModule,
     ReportingModule,
     XbrlModule,
+    TaxonomyModule,
+    SupplyChainModule,
   ],
 })
 export class AppModule implements NestModule {

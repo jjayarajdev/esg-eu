@@ -264,3 +264,67 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id, created_at DESC);
+
+-- EU TAXONOMY ASSESSMENTS
+CREATE TABLE IF NOT EXISTS taxonomy_assessments (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reporting_period_id UUID NOT NULL REFERENCES reporting_periods(id),
+    status              VARCHAR(20) NOT NULL DEFAULT 'draft',
+    turnover_aligned_pct NUMERIC(5,2),
+    capex_aligned_pct   NUMERIC(5,2),
+    opex_aligned_pct    NUMERIC(5,2),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS taxonomy_activity_screenings (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    assessment_id           UUID NOT NULL REFERENCES taxonomy_assessments(id) ON DELETE CASCADE,
+    nace_code               VARCHAR(20) NOT NULL,
+    activity_name           VARCHAR(500) NOT NULL,
+    environmental_objective VARCHAR(50) NOT NULL DEFAULT 'climate_mitigation',
+    turnover_eur            NUMERIC(20,2),
+    capex_eur               NUMERIC(20,2),
+    opex_eur                NUMERIC(20,2),
+    step_eligibility        BOOLEAN,
+    step_technical          JSONB,
+    step_dnsh               JSONB,
+    step_social             BOOLEAN,
+    is_aligned              BOOLEAN,
+    notes                   TEXT,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(assessment_id, nace_code)
+);
+
+-- SUPPLY CHAIN CAMPAIGNS
+CREATE TABLE IF NOT EXISTS supply_chain_campaigns (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name                VARCHAR(200) NOT NULL,
+    description         TEXT,
+    deadline            DATE,
+    metrics_requested   TEXT[] NOT NULL,
+    status              VARCHAR(20) NOT NULL DEFAULT 'active',
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS supply_chain_invites (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id     UUID NOT NULL REFERENCES supply_chain_campaigns(id) ON DELETE CASCADE,
+    supplier_name   VARCHAR(200) NOT NULL,
+    supplier_email  VARCHAR(320) NOT NULL,
+    access_token    VARCHAR(100) NOT NULL UNIQUE,
+    status          VARCHAR(20) NOT NULL DEFAULT 'pending',
+    submitted_at    TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS supply_chain_responses (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    invite_id       UUID NOT NULL REFERENCES supply_chain_invites(id) ON DELETE CASCADE,
+    metric_code     VARCHAR(50) NOT NULL,
+    numeric_value   NUMERIC(20,6),
+    text_value      TEXT,
+    notes           TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
