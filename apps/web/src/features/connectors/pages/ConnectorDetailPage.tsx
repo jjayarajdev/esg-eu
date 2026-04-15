@@ -246,21 +246,289 @@ Accept: application/json`,
       { sourceField: 'paymentPractices.onTimePaymentRate', esrsMetric: 'G1_6_ONTIME_PAYMENT_PCT', esrsName: 'On-time payment %' },
     ],
   },
-};
-
-// Add remaining connectors with minimal info
-['mock_sphera', 'mock_workday', 'mock_cdp', 'mock_celonis', 'mock_coupa', 'mock_powerbi'].forEach((key) => {
-  if (!CONNECTOR_META[key]) {
-    CONNECTOR_META[key] = {
-      displayName: key.replace('mock_', '').replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-      vendor: '', apiFormat: 'REST API', authTypes: ['API Key'],
-      docsUrl: '#', defaultEndpoint: `https://api.example.com/v1/${key.replace('mock_', '')}`,
-      description: 'Connector details available on configuration.', domain: 'Various',
-      esrsCoverage: [], sampleRequest: '...', sampleResponse: '...',
-      fieldMappings: [],
-    };
+  mock_sphera: {
+    displayName: 'Sphera', vendor: 'Sphera Solutions', apiFormat: 'REST API v1',
+    authTypes: ['API Key', 'OAuth 2.0'], docsUrl: 'https://docs.sphera.com/api',
+    defaultEndpoint: 'https://api.sphera.com/v1/products/compliance/export',
+    description: 'Product stewardship and EHS platform. Chemical compliance (REACH/CLP), product safety incidents, biodiversity screening, and circular economy metrics.',
+    domain: 'Product Safety / EHS', esrsCoverage: ['E2', 'E4', 'E5', 'S4'],
+    sampleRequest: `GET /v1/products/compliance/export?scope=corporate&year=2024
+Host: api.sphera.com
+Authorization: Bearer {api_key}
+Accept: application/json`,
+    sampleResponse: `{
+  "exportInfo": {
+    "systemId": "SPHERA-PROD-EU",
+    "scope": "Corporate"
+  },
+  "chemicalCompliance": {
+    "substancesOfConcern": {
+      "totalVolume_tonnes": 4200,
+      "substanceCount": 156,
+      "reachRegistered": 148
+    },
+    "svhcSubstances": {
+      "totalVolume_tonnes": 180,
+      "candidateListMatches": 8
+    }
+  },
+  "productSafety": {
+    "safetyIncidents": 2,
+    "customerComplaints": 156
+  },
+  "landUse": {
+    "totalOperationalArea_ha": 850,
+    "nearProtectedAreas_ha": 12,
+    "iucnSpeciesAffected": 3
   }
-});
+}`,
+    fieldMappings: [
+      { sourceField: 'chemicalCompliance.substancesOfConcern.totalVolume_tonnes', esrsMetric: 'E2_5_SUBSTANCES_OF_CONCERN', esrsName: 'Substances of concern' },
+      { sourceField: 'chemicalCompliance.svhcSubstances.totalVolume_tonnes', esrsMetric: 'E2_5_SVHC_SUBSTANCES', esrsName: 'SVHC substances' },
+      { sourceField: 'landUse.totalOperationalArea_ha', esrsMetric: 'E4_5_LAND_USE_TOTAL', esrsName: 'Total land use' },
+      { sourceField: 'landUse.nearProtectedAreas_ha', esrsMetric: 'E4_5_LAND_USE_PROTECTED', esrsName: 'Near protected areas' },
+      { sourceField: 'landUse.iucnSpeciesAffected', esrsMetric: 'E4_5_SPECIES_AT_RISK', esrsName: 'IUCN species at risk' },
+      { sourceField: 'circularEconomy.renewableMaterials_tonnes', esrsMetric: 'E5_4_MATERIALS_RENEWABLE', esrsName: 'Renewable materials' },
+      { sourceField: 'circularEconomy.wasteRecycled_tonnes', esrsMetric: 'E5_5_WASTE_RECYCLED', esrsName: 'Waste recycled' },
+      { sourceField: 'productSafety.safetyIncidents', esrsMetric: 'S4_4_PRODUCT_SAFETY_INCIDENTS', esrsName: 'Product safety incidents' },
+      { sourceField: 'productSafety.customerComplaints', esrsMetric: 'S4_4_CUSTOMER_COMPLAINTS', esrsName: 'Customer complaints' },
+    ],
+  },
+  mock_workday: {
+    displayName: 'Workday HCM', vendor: 'Workday Inc.', apiFormat: 'REST (RAAS Reports)',
+    authTypes: ['OAuth 2.0', 'API Key'], docsUrl: 'https://community.workday.com/api',
+    defaultEndpoint: 'https://wd5-impl-services1.workday.com/ccx/api/analytics/v1/reports',
+    description: 'Human Capital Management platform. Provides workforce demographics, training, compensation, and benefits data via custom RAAS (Report-as-a-Service) exports.',
+    domain: 'HR / People', esrsCoverage: ['S1'],
+    sampleRequest: `GET /ccx/api/analytics/v1/reports/ESRS_Workforce_Export
+Host: wd5-impl-services1.workday.com
+Authorization: Bearer {oauth_token}
+Accept: application/json`,
+    sampleResponse: `{
+  "Report_Name": "ESRS_Workforce_Export_FY2024",
+  "Organization": {
+    "Organization_ID": "ACME_GLOBAL",
+    "Organization_Name": "Acme Corporation"
+  },
+  "Report_Entry": [
+    {
+      "Worker_Group": "All Workers",
+      "Metric_ID": "WD-HC-FT",
+      "Metric_Name": "Full-Time Headcount",
+      "Value": 31050
+    },
+    {
+      "Worker_Group": "All Workers",
+      "Metric_ID": "WD-DEI-DISABILITY",
+      "Metric_Name": "Disability Disclosure Rate",
+      "Value": 3.8
+    },
+    {
+      "Worker_Group": "Executive",
+      "Metric_ID": "WD-COMP-RATIO",
+      "Metric_Name": "CEO-to-Median Pay Ratio",
+      "Value": 42
+    }
+  ]
+}`,
+    fieldMappings: [
+      { sourceField: 'Report_Entry[WD-HC-FT].Value', esrsMetric: 'S1_6_EMPLOYEES_FULLTIME', esrsName: 'Full-time employees' },
+      { sourceField: 'Report_Entry[WD-HC-PT].Value', esrsMetric: 'S1_6_EMPLOYEES_PARTTIME', esrsName: 'Part-time employees' },
+      { sourceField: 'Report_Entry[WD-CW-TOTAL].Value', esrsMetric: 'S1_7_NONEMPLOYEE_WORKERS', esrsName: 'Non-employee workers' },
+      { sourceField: 'Report_Entry[WD-DEI-DISABILITY].Value', esrsMetric: 'S1_12_DISABILITY_PCT', esrsName: 'Persons with disabilities %' },
+      { sourceField: 'Report_Entry[WD-LEAVE-ENTITLED].Value', esrsMetric: 'S1_15_FAMILY_LEAVE_ENTITLED_PCT', esrsName: 'Family leave entitlement %' },
+      { sourceField: 'Report_Entry[WD-LRN-HOURS].Value', esrsMetric: 'S1_13_TRAINING_HOURS_TOTAL', esrsName: 'Total training hours' },
+      { sourceField: 'Report_Entry[WD-TERM-INVOL].Value', esrsMetric: 'S1_6_INVOLUNTARY_TURNOVER_RATE', esrsName: 'Involuntary turnover rate' },
+      { sourceField: 'Report_Entry[WD-COMP-RATIO].Value', esrsMetric: 'S1_16_CEO_PAY_RATIO', esrsName: 'CEO pay ratio' },
+    ],
+  },
+  mock_cdp: {
+    displayName: 'CDP', vendor: 'CDP Worldwide', apiFormat: 'REST API v1',
+    authTypes: ['API Key'], docsUrl: 'https://guidance.cdp.net/en/tags?cid=api',
+    defaultEndpoint: 'https://api.cdp.net/v1/responses/climate-change/2024',
+    description: 'Carbon Disclosure Project — the primary investor-driven climate disclosure platform. Provides governance, targets, and transition plan data already reported by the company.',
+    domain: 'Climate Disclosure', esrsCoverage: ['ESRS_2', 'E1'],
+    sampleRequest: `GET /v1/responses/climate-change/2024
+Host: api.cdp.net
+Authorization: ApiKey {key}
+Accept: application/json`,
+    sampleResponse: `{
+  "responseMetadata": {
+    "accountId": "CDP-ACME-2024",
+    "questionnaire": "Climate Change 2024",
+    "score": "A-",
+    "submissionDate": "2024-07-31"
+  },
+  "governance": {
+    "boardOversight": true,
+    "dedicatedCommittee": true,
+    "sustainabilityIncentives": true,
+    "incentivePercentage": 15
+  },
+  "targets": {
+    "hasScienceBasedTarget": true,
+    "targetYear": 2030,
+    "reductionPercentage": 42,
+    "scope": "Scope 1+2",
+    "status": "Validated by SBTi"
+  },
+  "transitionPlan": {
+    "alignedWith15C": true
+  }
+}`,
+    fieldMappings: [
+      { sourceField: 'transitionPlan.alignedWith15C', esrsMetric: 'E1_1_TRANSITION_PLAN_ALIGNED', esrsName: 'Paris-aligned transition plan' },
+      { sourceField: 'targets.reductionPercentage', esrsMetric: 'E1_4_GHG_REDUCTION_TARGET_PCT', esrsName: 'GHG reduction target %' },
+      { sourceField: 'targets.targetYear', esrsMetric: 'E1_4_GHG_TARGET_YEAR', esrsName: 'Target year' },
+      { sourceField: 'governance.boardOversight', esrsMetric: 'ESRS2_GOV1_BOARD_SUSTAINABILITY_OVERSIGHT', esrsName: 'Board sustainability oversight' },
+      { sourceField: 'governance.dedicatedCommittee', esrsMetric: 'ESRS2_GOV1_SUSTAINABILITY_COMMITTEE', esrsName: 'Sustainability committee' },
+      { sourceField: 'governance.sustainabilityIncentives', esrsMetric: 'ESRS2_GOV3_SUSTAINABILITY_REMUNERATION', esrsName: 'Sustainability remuneration' },
+      { sourceField: 'governance.incentivePercentage', esrsMetric: 'ESRS2_GOV3_SUSTAINABILITY_REMUNERATION_PCT', esrsName: 'Remuneration linked %' },
+    ],
+  },
+  mock_celonis: {
+    displayName: 'Celonis', vendor: 'Celonis SE', apiFormat: 'REST API',
+    authTypes: ['OAuth 2.0', 'API Key'], docsUrl: 'https://developer.celonis.com',
+    defaultEndpoint: 'https://acme.celonis.cloud/integration/api/v1/data-pools/export',
+    description: 'Process mining platform. Analyzes operational data from ERP/MES systems to surface environmental inefficiencies, resource waste, and safety patterns.',
+    domain: 'Process Mining', esrsCoverage: ['E1', 'E3', 'E5', 'S1'],
+    sampleRequest: `POST /integration/api/v1/data-pools/dp-acme-prod/export
+Host: acme.celonis.cloud
+Authorization: Bearer {api_key}
+Content-Type: application/json
+
+{
+  "analysisId": "CEL-ESG-2024-Q4",
+  "processScope": "Manufacturing + Logistics"
+}`,
+    sampleResponse: `{
+  "analysisExport": {
+    "analysisId": "CEL-ESG-2024-Q4",
+    "dataPoolId": "dp-acme-prod",
+    "processScope": "Manufacturing + Logistics"
+  },
+  "operationalInsights": {
+    "waterManagement": {
+      "recycledVolume_ML": 5.8,
+      "waterIntensity_MLPerMRevenue": 1.16
+    },
+    "wasteFromProcesses": {
+      "nonHazardousWaste_tonnes": 13700
+    },
+    "energyFromProcesses": {
+      "nonRenewableConsumption_MWh": 510000
+    },
+    "safetyFromProcessAnalysis": {
+      "recordableIncidents": 23,
+      "daysLostToInjury": 412,
+      "occupationalDiseases": 5,
+      "nearMisses": 142
+    }
+  }
+}`,
+    fieldMappings: [
+      { sourceField: 'operationalInsights.waterManagement.recycledVolume_ML', esrsMetric: 'E3_4_WATER_RECYCLED', esrsName: 'Water recycled' },
+      { sourceField: 'operationalInsights.waterManagement.waterIntensity_MLPerMRevenue', esrsMetric: 'E3_4_WATER_INTENSITY', esrsName: 'Water intensity' },
+      { sourceField: 'operationalInsights.wasteFromProcesses.nonHazardousWaste_tonnes', esrsMetric: 'E5_5_WASTE_NONHAZARDOUS', esrsName: 'Non-hazardous waste' },
+      { sourceField: 'operationalInsights.energyFromProcesses.nonRenewableConsumption_MWh', esrsMetric: 'E1_5_ENERGY_CONSUMPTION_NONRENEWABLE', esrsName: 'Non-renewable energy' },
+      { sourceField: 'operationalInsights.safetyFromProcessAnalysis.recordableIncidents', esrsMetric: 'S1_14_RECORDABLE_INCIDENTS', esrsName: 'Recordable incidents' },
+      { sourceField: 'operationalInsights.safetyFromProcessAnalysis.daysLostToInjury', esrsMetric: 'S1_14_DAYS_LOST', esrsName: 'Days lost to injury' },
+      { sourceField: 'operationalInsights.safetyFromProcessAnalysis.occupationalDiseases', esrsMetric: 'S1_14_OCCUPATIONAL_DISEASE', esrsName: 'Occupational diseases' },
+    ],
+  },
+  mock_coupa: {
+    displayName: 'Coupa', vendor: 'Coupa Software', apiFormat: 'REST API',
+    authTypes: ['OAuth 2.0', 'API Key'], docsUrl: 'https://compass.coupa.com/api',
+    defaultEndpoint: 'https://acme.coupahost.com/api/suppliers/compliance/export',
+    description: 'Business Spend Management platform. Provides supplier compliance data, community impact metrics, human rights findings, and environmental supply chain data.',
+    domain: 'Procurement', esrsCoverage: ['S2', 'S3', 'S1', 'E4'],
+    sampleRequest: `GET /api/suppliers/compliance/export?fiscal_year=2024
+Host: acme.coupahost.com
+Authorization: Bearer {oauth_token}
+Accept: application/json`,
+    sampleResponse: `{
+  "exportMetadata": {
+    "instanceUrl": "https://acme.coupahost.com",
+    "currency": "EUR"
+  },
+  "supplierCompliance": {
+    "totalActiveSuppliers": 1600,
+    "suppliersAssessedForSocialImpact": 890,
+    "highRiskSuppliers": 45
+  },
+  "communityImpact": {
+    "grievancesReceived": 7,
+    "grievancesResolved": 5
+  },
+  "humanRights": {
+    "discriminationIncidentsReported": 3,
+    "humanRightsComplaintsReceived": 8,
+    "modernSlaveryStatementPublished": true
+  },
+  "environmentalSupplyChain": {
+    "landUseChangeFromSourcing_ha": 2.5
+  }
+}`,
+    fieldMappings: [
+      { sourceField: 'supplierCompliance.suppliersAssessedForSocialImpact', esrsMetric: 'S2_4_SUPPLIERS_ASSESSED', esrsName: 'Suppliers assessed' },
+      { sourceField: 'communityImpact.grievancesReceived', esrsMetric: 'S3_4_COMMUNITY_GRIEVANCES', esrsName: 'Community grievances' },
+      { sourceField: 'humanRights.discriminationIncidentsReported', esrsMetric: 'S1_17_DISCRIMINATION_INCIDENTS', esrsName: 'Discrimination incidents' },
+      { sourceField: 'humanRights.humanRightsComplaintsReceived', esrsMetric: 'S1_17_HUMAN_RIGHTS_COMPLAINTS', esrsName: 'Human rights complaints' },
+      { sourceField: 'environmentalSupplyChain.landUseChangeFromSourcing_ha', esrsMetric: 'E4_5_LAND_USE_CHANGE', esrsName: 'Land use change' },
+    ],
+  },
+  mock_powerbi: {
+    displayName: 'Power BI', vendor: 'Microsoft', apiFormat: 'REST API (DAX Queries)',
+    authTypes: ['OAuth 2.0 (Azure AD)'], docsUrl: 'https://learn.microsoft.com/en-us/rest/api/power-bi/',
+    defaultEndpoint: 'https://api.powerbi.com/v1.0/myorg/datasets/{datasetId}/executeQueries',
+    description: 'Business Intelligence platform. Serves as a reporting layer aggregating ESG data from multiple department dashboards into consolidated exports.',
+    domain: 'Business Intelligence', esrsCoverage: ['E1', 'E2', 'E3', 'S1'],
+    sampleRequest: `POST /v1.0/myorg/datasets/ds-acme-esg/executeQueries
+Host: api.powerbi.com
+Authorization: Bearer {azure_ad_token}
+Content-Type: application/json
+
+{
+  "queries": [{
+    "query": "EVALUATE SUMMARIZE(ESG_KPIs, ESG_KPIs[Measure], ESG_KPIs[Value], ESG_KPIs[Department])"
+  }]
+}`,
+    sampleResponse: `{
+  "requestId": "pbi-esg-export-20250120",
+  "datasetId": "ds-acme-esg-consolidated",
+  "reportName": "ESG Consolidated KPIs Q4 2024",
+  "results": [{
+    "tables": [{
+      "rows": [
+        {
+          "measure": "GHG_Scope2_Location",
+          "category": "Emissions",
+          "value": 44200,
+          "unit": "tCO2e",
+          "department": "Sustainability",
+          "lastRefreshed": "2025-01-15T06:00:00Z"
+        },
+        {
+          "measure": "Water_Stress_Areas",
+          "category": "Water",
+          "value": 3.2,
+          "unit": "ML",
+          "department": "HSE&S"
+        }
+      ]
+    }]
+  }]
+}`,
+    fieldMappings: [
+      { sourceField: 'results[].rows[measure=GHG_Scope2_Location].value', esrsMetric: 'E1_6_GHG_SCOPE2_LOCATION', esrsName: 'Scope 2 GHG (location)' },
+      { sourceField: 'results[].rows[measure=GHG_Total].value', esrsMetric: 'E1_6_GHG_TOTAL', esrsName: 'Total GHG emissions' },
+      { sourceField: 'results[].rows[measure=Soil_Pollutants].value', esrsMetric: 'E2_4_SOIL_POLLUTANTS', esrsName: 'Soil pollutants' },
+      { sourceField: 'results[].rows[measure=Water_Discharge].value', esrsMetric: 'E3_4_WATER_DISCHARGE_TOTAL', esrsName: 'Water discharge' },
+      { sourceField: 'results[].rows[measure=Water_Stress_Areas].value', esrsMetric: 'E3_4_WATER_STRESS_AREAS', esrsName: 'Water stress areas' },
+      { sourceField: 'results[].rows[measure=Collective_Bargaining].value', esrsMetric: 'S1_8_COLLECTIVE_BARGAINING_PCT', esrsName: 'Collective bargaining %' },
+    ],
+  },
+};
 
 export function ConnectorDetailPage() {
   const { connectorType } = useParams<{ connectorType: string }>();
