@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { api } from '../../../lib/api-client';
 
 interface Props {
@@ -39,13 +39,21 @@ const CONFIDENCE_INFO: Record<string, { label: string; desc: string; color: stri
   estimated: { label: 'Estimated', desc: 'Best estimate based on available information and assumptions', color: 'bg-amber-100 text-amber-700' },
 };
 
+interface EvidenceDoc {
+  id: string; file_name: string; file_size: number; mime_type: string; created_at: string;
+}
+
 export function DataPointDetail({ dataPointId, onClose }: Props) {
   const [dp, setDp] = useState<DataPointFull | null>(null);
   const [history, setHistory] = useState<AuditEntry[]>([]);
+  const [evidence, setEvidence] = useState<EvidenceDoc[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadDetail();
     loadHistory();
+    loadEvidence();
   }, [dataPointId]);
 
   async function loadDetail() {
@@ -56,6 +64,46 @@ export function DataPointDetail({ dataPointId, onClose }: Props) {
   async function loadHistory() {
     const res = await api<{ data: AuditEntry[] }>(`/data/points/${dataPointId}/history`);
     setHistory(res.data);
+  }
+
+  async function loadEvidence() {
+    const res = await api<{ data: EvidenceDoc[] }>(`/data/evidence?entityType=metric_value&entityId=${dataPointId}`);
+    setEvidence(res.data);
+  }
+
+  async function handleFileUpload(file: File) {
+    setUploading(true);
+    try {
+      // Get presigned upload URL
+      const urlRes = await api<{ data: { uploadUrl: string; storageKey: string } }>('/data/evidence/upload-url', {
+        method: 'POST',
+        body: {
+          entityType: 'metric_value',
+          entityId: dataPointId,
+          fileName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          fileSize: file.size,
+        },
+      });
+
+      // Upload file to MinIO/S3 via presigned URL
+      await fetch(urlRes.data.uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      });
+
+      loadEvidence();
+    } catch (err: any) {
+      alert(`Upload failed: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function downloadEvidence(evidenceId: string) {
+    const res = await api<{ data: { downloadUrl: string; fileName: string } }>(`/data/evidence/${evidenceId}/download-url`);
+    window.open(res.data.downloadUrl, '_blank');
   }
 
   if (!dp) return null;
@@ -132,6 +180,55 @@ export function DataPointDetail({ dataPointId, onClose }: Props) {
               <div className="font-medium text-slate-800">{new Date(dp.updated_at).toLocaleString()}</div>
             </div>
           </div>
+        </div>
+
+        {/* Evidence documents */}
+        <div className="px-6 py-4 border-b border-slate-100">
+          <div className="flex justify-between items-center mb-3">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Evidence Documents</div>
+            <div>
+              <input ref={fileInputRef} type="file" className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.jpg,.png,.txt" />
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium disabled:opacity-50">
+                {uploading ? 'Uploading...' : 'Attach File'}
+              </button>
+            </div>
+          </div>
+          {evidence.length === 0 ? (
+            <div className="text-center py-6 border border-dashed border-slate-200 rounded-lg">
+              <div className="text-slate-400 text-sm mb-1">No evidence attached</div>
+              <div className="text-slate-300 text-xs">Upload PDFs, spreadsheets, or images to support this data point</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {evidence.map((doc) => (
+                <div key={doc.id} onClick={() => downloadEvidence(doc.id)}
+                  className="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-8 h-8 rounded flex items-center justify-center text-[10px] font-bold ${
+                      doc.mime_type.includes('pdf') ? 'bg-red-100 text-red-600' :
+                      doc.mime_type.includes('sheet') || doc.mime_type.includes('excel') || doc.mime_type.includes('csv') ? 'bg-emerald-100 text-emerald-600' :
+                      doc.mime_type.includes('image') ? 'bg-violet-100 text-violet-600' :
+                      'bg-slate-100 text-slate-500'
+                    }`}>
+                      {doc.mime_type.includes('pdf') ? 'PDF' :
+                       doc.mime_type.includes('sheet') || doc.mime_type.includes('csv') ? 'XLS' :
+                       doc.mime_type.includes('image') ? 'IMG' : 'DOC'}
+                    </span>
+                    <div>
+                      <div className="text-sm font-medium text-slate-700">{doc.file_name}</div>
+                      <div className="text-[10px] text-slate-400">
+                        {(doc.file_size / 1024).toFixed(0)} KB &middot; {new Date(doc.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-blue-500">Download</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Audit trail timeline */}

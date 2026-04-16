@@ -19,6 +19,8 @@ import { ConnectorDetailPage } from './features/connectors/pages/ConnectorDetail
 import { TaxonomyPage } from './features/taxonomy/pages/TaxonomyPage';
 import { SupplyChainPage } from './features/supply-chain/pages/SupplyChainPage';
 import { SupplierPortalPage } from './features/supply-chain/pages/SupplierPortalPage';
+import { SfdrPage } from './features/sfdr/pages/SfdrPage';
+import { NotificationBell } from './components/NotificationBell';
 
 export function App() {
   return (
@@ -47,6 +49,7 @@ const NAV_SECTIONS = [
       { to: '/data', label: 'Data Collection', icon: 'D' },
       { to: '/reports', label: 'Reports', icon: 'R' },
       { to: '/taxonomy', label: 'EU Taxonomy', icon: 'T' },
+      { to: '/sfdr', label: 'SFDR', icon: 'F' },
     ],
   },
   {
@@ -161,6 +164,7 @@ function AppShell() {
             )}
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-sm font-bold">
               A
             </div>
@@ -192,6 +196,7 @@ function AppShell() {
               <Route path="/taxonomy" element={<TaxonomyPage />} />
               <Route path="/supply-chain" element={<SupplyChainPage />} />
               <Route path="/supply-chain/:id" element={<SupplyChainPage />} />
+              <Route path="/sfdr" element={<SfdrPage />} />
             </Routes>
           )}
         </div>
