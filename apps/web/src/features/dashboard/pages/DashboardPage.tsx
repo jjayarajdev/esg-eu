@@ -6,6 +6,7 @@ import { DonutChart } from '../../../components/charts/DonutChart';
 import { BarChart } from '../../../components/charts/BarChart';
 import { ProgressRing } from '../../../components/charts/ProgressRing';
 import { Heatmap } from '../../../components/charts/Heatmap';
+import { BenchmarkChart } from '../../../components/charts/BenchmarkChart';
 
 interface DataPoint {
   metric_code: string; standard_code: string; numeric_value: number | null;
@@ -181,7 +182,46 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Row 4: Quick actions */}
+      {/* Row 4: Peer Benchmarking */}
+      {dataPoints.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+          <div className="text-sm font-semibold text-slate-700 mb-4">Peer Benchmarking — Chemicals & Materials Industry</div>
+          <BenchmarkChart items={[
+            {
+              metric: 'GHG Intensity (tCO2e / EUR M revenue)',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'E1_6_GHG_INTENSITY')?.numeric_value || 22.5),
+              industryAvg: 28.4, industryBest: 12.1, unit: 'tCO2e/M', lowerIsBetter: true,
+            },
+            {
+              metric: 'Renewable Energy Share',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'E1_5_ENERGY_RENEWABLE_PCT')?.numeric_value || 40),
+              industryAvg: 32, industryBest: 78, unit: '%', lowerIsBetter: false,
+            },
+            {
+              metric: 'Waste Recycling Rate',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'E5_5_WASTE_RECYCLING_RATE')?.numeric_value || 72),
+              industryAvg: 58, industryBest: 92, unit: '%', lowerIsBetter: false,
+            },
+            {
+              metric: 'Gender Pay Gap',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'S1_16_GENDER_PAY_GAP')?.numeric_value || 4.2),
+              industryAvg: 8.5, industryBest: 1.2, unit: '%', lowerIsBetter: true,
+            },
+            {
+              metric: 'Total Recordable Incident Rate (TRIR)',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'S1_14_TRIR')?.numeric_value || 0.42),
+              industryAvg: 1.1, industryBest: 0.15, unit: '', lowerIsBetter: true,
+            },
+            {
+              metric: 'Women in Management',
+              yourValue: Number(dataPoints.find((d) => d.metric_code === 'S1_9_WOMEN_MANAGEMENT_PCT')?.numeric_value || 32),
+              industryAvg: 28, industryBest: 48, unit: '%', lowerIsBetter: false,
+            },
+          ]} />
+        </div>
+      )}
+
+      {/* Row 5: Quick actions */}
       <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Quick Actions</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link to="/data/new" className="block rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 p-5 transition-colors">
