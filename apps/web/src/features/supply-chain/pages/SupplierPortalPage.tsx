@@ -59,9 +59,16 @@ export function SupplierPortalPage() {
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-slate-800">EU ESG Platform</h1>
-            <div className="text-xs text-slate-400">Supplier Data Portal</div>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800">ESG Suite</h1>
+              <div className="text-[10px] text-slate-400">Supplier Data Portal</div>
+            </div>
           </div>
           <div className="text-xs text-slate-400">Powered by ESRS/VSME</div>
         </div>

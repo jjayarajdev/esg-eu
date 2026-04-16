@@ -88,8 +88,18 @@ function AppShell() {
       <aside className="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0">
         {/* Logo */}
         <div className="px-5 py-5 border-b border-slate-700">
-          <div className="text-lg font-bold tracking-tight">EU ESG Platform</div>
-          <div className="text-xs text-slate-400 mt-0.5">ESRS Compliance Suite</div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-lg font-bold tracking-tight">ESG Suite</div>
+              <div className="text-[10px] text-slate-400 -mt-0.5">Sustainability Compliance</div>
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}
@@ -157,7 +167,7 @@ function AppShell() {
             <h1 className="text-lg font-semibold text-slate-800">
               {NAV_SECTIONS.flatMap((s) => s.items).find((i) =>
                 i.to === '/' ? location.pathname === '/' : location.pathname.startsWith(i.to),
-              )?.label || 'EU ESG Platform'}
+              )?.label || 'ESG Suite'}
             </h1>
             {tenant && (
               <p className="text-xs text-slate-400 mt-0.5">{tenant.name}</p>

@@ -9,7 +9,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      service: 'esg-platform-api',
+      service: 'esg-suite-api',
       version: '0.1.0',
       timestamp: new Date().toISOString(),
     };

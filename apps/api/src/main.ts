@@ -32,8 +32,8 @@ async function bootstrap() {
 
   // Swagger / OpenAPI
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('EU ESG Platform API')
-    .setDescription('ESRS compliance reporting platform API')
+    .setTitle('ESG Suite API')
+    .setDescription('Sustainability compliance reporting platform API')
     .setVersion('0.1.0')
     .addBearerAuth()
     .addTag('health', 'Health check endpoints')
@@ -50,7 +50,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  console.log(`ESG Platform API running on http://localhost:${port}`);
+  console.log(`ESG Suite API running on http://localhost:${port}`);
   console.log(`Swagger docs at http://localhost:${port}/api/docs`);
 }
 

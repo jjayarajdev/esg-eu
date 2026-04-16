@@ -66,10 +66,15 @@ export function OnboardingWizard({ onComplete }: Props) {
   const steps = [
     // Step 0: Welcome
     <div key="welcome" className="text-center">
-      <div className="text-5xl mb-4">ESG</div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-2">Welcome to EU ESG Platform</h2>
+      <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold text-slate-800 mb-2">Welcome to ESG Suite</h2>
       <p className="text-slate-500 mb-8 max-w-md mx-auto">
-        Let's set up your organization for ESRS compliance reporting. This takes about 30 seconds.
+        Let's set up your organization for sustainability compliance reporting. This takes about 30 seconds.
       </p>
       <button onClick={() => setStep(1)}
         className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
