@@ -53,11 +53,25 @@ export function DataCollectionPage() {
   }
 
   async function ingestMockData(connectorType: string) {
-    if (!selectedPeriod) return;
+    if (!selectedPeriod) { alert('Create a reporting period first (Setup page).'); return; }
     setImporting(connectorType);
-    await api('/ingest/' + connectorType, {
-      method: 'POST', body: { reportingPeriodId: selectedPeriod, payload: {} },
-    });
+    try {
+      await api('/ingest/' + connectorType, {
+        method: 'POST', body: { reportingPeriodId: selectedPeriod, payload: {} },
+      });
+    } catch (err: any) { alert(`Import failed: ${err.message}`); }
+    setImporting(null);
+    loadDataPoints();
+  }
+
+  async function importAllSources() {
+    if (!selectedPeriod) { alert('Create a reporting period first (Setup page).'); return; }
+    setImporting('all');
+    const sources = ['mock_enablon', 'mock_successfactors', 'mock_sap_s4hana', 'mock_ecovadis', 'mock_ethicspoint', 'mock_sphera', 'mock_workday', 'mock_cdp', 'mock_celonis', 'mock_coupa', 'mock_powerbi'];
+    for (const src of sources) {
+      try { await api('/ingest/' + src, { method: 'POST', body: { reportingPeriodId: selectedPeriod, payload: {} } }); }
+      catch {}
+    }
     setImporting(null);
     loadDataPoints();
   }
@@ -80,6 +94,11 @@ export function DataCollectionPage() {
         <button onClick={() => navigate('/data/upload')}
           className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm rounded-lg font-medium transition-colors">
           Upload CSV
+        </button>
+        <div className="h-6 w-px bg-slate-200" />
+        <button onClick={importAllSources} disabled={importing === 'all' || !selectedPeriod}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors disabled:opacity-50">
+          {importing === 'all' ? 'Importing all...' : 'Import All Sources'}
         </button>
         <div className="h-6 w-px bg-slate-200" />
         {[
