@@ -17,6 +17,7 @@ import { XbrlModule } from './modules/xbrl/xbrl.module';
 import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
 import { SupplyChainModule } from './modules/supply-chain/supply-chain.module';
 import { SfdrModule } from './modules/sfdr/sfdr.module';
+import { JurisdictionModule } from './modules/jurisdiction/jurisdiction.module';
 
 /**
  * Root application module.
@@ -51,6 +52,7 @@ import { SfdrModule } from './modules/sfdr/sfdr.module';
     TaxonomyModule,
     SupplyChainModule,
     SfdrModule,
+    JurisdictionModule,
   ],
 })
 export class AppModule implements NestModule {
